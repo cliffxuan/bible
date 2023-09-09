@@ -280,9 +280,6 @@ class Verse:
     number: int
     text: str = ""
 
-    def to_markdown(self) -> str:
-        return verse_to_markdown(self.text, self.number)
-
 
 @dataclass
 class Chapter:

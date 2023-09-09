@@ -13,7 +13,7 @@ def main():
     if cols[1].toggle(":scroll:"):
         st.markdown(f"```\n{get_from_esv(query=query)}\n```")
     else:
-        st.markdown(get_from_esv(query=query))
+        st.markdown(get_from_esv(query=query, strict=True), unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
