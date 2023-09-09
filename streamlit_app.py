@@ -5,10 +5,15 @@ from bible import get_from_esv
 
 def main():
     st.header("ESV Bible")
-    query = st.text_input(
-        "search", value="Psalm8", placeholder="Psalm8 | Ps8 | Ps8:1-3 | Ps8v1-3"
+    cols = st.columns([5, 1])
+    query = cols[0].text_input(
+        "search", value="Psalm8", placeholder="Psalm8 | Ps8 | Ps8:1-3 | Ps8v1-3",
+        label_visibility="collapsed"
     )
-    st.markdown(f"```\n{get_from_esv(query=query)}\n```")
+    if cols[1].toggle(":scroll:"):
+        st.markdown(f"```\n{get_from_esv(query=query)}\n```")
+    else:
+        st.markdown(get_from_esv(query=query))
 
 
 if __name__ == "__main__":
