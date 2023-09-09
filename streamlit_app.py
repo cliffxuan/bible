@@ -7,13 +7,15 @@ def main():
     st.header("ESV Bible")
     cols = st.columns([5, 1])
     query = cols[0].text_input(
-        "search", value="Psalm8", placeholder="Psalm8 | Ps8 | Ps8:1-3 | Ps8v1-3",
+        "search", value="Psalm8", placeholder="search pattern: Psalm8 | Ps8 | Ps8:1-3 | Ps8v1-3",
         label_visibility="collapsed"
     )
-    if cols[1].toggle(":scroll:"):
-        st.markdown(f"```\n{get_from_esv(query=query)}\n```")
-    else:
-        st.markdown(get_from_esv(query=query, strict=True), unsafe_allow_html=True)
+    if query.strip():
+        text = get_from_esv(query=query, strict=True)
+        if cols[1].toggle(":scroll:"):
+            st.markdown(f"```\n{text}\n```")
+        else:
+            st.markdown(text, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
