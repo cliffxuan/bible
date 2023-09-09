@@ -1,21 +1,54 @@
 import streamlit as st
 
-from bible import get_from_esv
+from bible import get_from_esv, parse_query
+
+
+def get_prev_next_chapters(query: str) -> tuple[str, str]:
+    start_verse, end_verse = parse_query(query)
+    if start_verse.chapter_number == 1:
+        prev_book = start_verse.book.prev()
+        prev_chapter = f"{prev_book.name.lower()}{prev_book.chapter_count}"
+    else:
+        prev_chapter = (
+            f"{start_verse.book.name.lower()}{max(start_verse.chapter_number - 1, 1)}"
+        )
+    cur_verse = end_verse or start_verse
+    if cur_verse.chapter_number < cur_verse.book.chapter_count:
+        next_chapter = f"{cur_verse.book.name.lower()}{cur_verse.chapter_number + 1}"
+    else:
+        next_chapter = f"{cur_verse.book.next().name.lower()}1"
+    return prev_chapter, next_chapter
+
+
+def set_search_query(query: str):
+    st.session_state.query = query
 
 
 def main():
     st.header("ESV Bible")
+    value = st.session_state.setdefault("query", "Psalm8")
     cols = st.columns([5, 1])
     query = cols[0].text_input(
-        "search", value="Psalm8", placeholder="search pattern: Psalm8 | Ps8 | Ps8:1-3 | Ps8v1-3",
-        label_visibility="collapsed"
+        "search",
+        value=value,
+        placeholder="search pattern: Psalm8 | Ps8 | Ps8:1-3 | Ps8v1-3",
+        label_visibility="collapsed",
     )
-    if query.strip():
-        text = get_from_esv(query=query, strict=True)
-        if cols[1].toggle(":scroll:"):
-            st.markdown(f"```\n{text}\n```")
-        else:
-            st.markdown(text, unsafe_allow_html=True)
+    if not query.strip():
+        return
+    prev_chapter, next_chapter = get_prev_next_chapters(query)
+    text = get_from_esv(query=query, strict=True)
+    if cols[1].toggle(":scroll:"):
+        st.markdown(f"```\n{text}\n```")
+    else:
+        st.markdown(text, unsafe_allow_html=True)
+    cols = st.columns([1, 6, 1])
+    cols[0].button(
+        ":arrow_backward:", on_click=set_search_query, kwargs={"query": prev_chapter}
+    )
+    cols[-1].button(
+        ":arrow_forward:", on_click=set_search_query, kwargs={"query": next_chapter}
+    )
 
 
 if __name__ == "__main__":
