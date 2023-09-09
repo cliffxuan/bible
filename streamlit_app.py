@@ -8,7 +8,7 @@ def main():
     query = st.text_input(
         "search", value="Psalm8", placeholder="Psalm8 | Ps8 | Ps8:1-3 | Ps8v1-3"
     )
-    st.text(get_from_esv(query=query))
+    st.markdown(f"```\n{get_from_esv(query=query)}\n```")
 
 
 if __name__ == "__main__":
