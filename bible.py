@@ -1,14 +1,13 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
 import base64
 import json
 import re
-import sys
 import typing as t
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
+from functools import cache
 
 BOOKS = {
     1: ("Genesis", 50),
@@ -129,7 +128,7 @@ class BookNotFound(Exception):
     pass
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class Book:
     number: int
     name: str
@@ -263,7 +262,7 @@ def verse_to_markdown(
         return text
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class Verse:
     """
     {
@@ -280,8 +279,11 @@ class Verse:
     number: int
     text: str = ""
 
+    def to_markdown(self) -> str:
+        return verse_to_markdown(self.text, self.number)
 
-@dataclass
+
+@dataclass(frozen=True, eq=True)
 class Chapter:
     number: int
     book: Book
@@ -323,7 +325,12 @@ def get_esv_passages(start_verse: Verse, end_verse: t.Optional[Verse]) -> str:
             qs = f"{qs}-{end_verse.chapter_number}"
             if end_verse.number > 0:
                 qs = f"{qs}:{end_verse.number}"
-    qs = urllib.parse.urlencode({"q": qs})
+    return call_esv_api(qs)
+
+
+@cache
+def call_esv_api(query: str) -> str:
+    qs = urllib.parse.urlencode({"q": query})
     token = base64.b85decode(b"F<~)fGGa1gV_`WmF=I40Gc!0aGch(}F=8}gH92B8HaKN6G%;Z_")
     response = urllib.request.urlopen(
         urllib.request.Request(
@@ -658,4 +665,5 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:] or ["Ps8"])
+    # main(["43", "9", "-s", "esv"])
+    main()
