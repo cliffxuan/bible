@@ -27,23 +27,27 @@ def set_search_query(query: str):
     st.session_state.query = query
 
 
+def get_search_query() -> str:
+    return st.session_state.setdefault("query", "Psalm8")
+
+
 def main():
     st.header("ESV Bible")
-    value = st.session_state.setdefault("query", "Psalm8")
     cols = st.columns([5, 1])
     query = cols[0].text_input(
         "search",
-        value=value,
+        value=get_search_query(),
         placeholder="search pattern: Psalm8 | Ps8 | Ps8:1-3 | Ps8v1-3",
         label_visibility="collapsed",
     )
     if not query.strip():
         return
     prev_chapter, next_chapter = get_prev_next_chapters(query)
-    text = get_from_esv(query=query, strict=True)
     if cols[1].toggle(":scroll:"):
+        text = get_from_esv(query=query, strict=False)
         st.markdown(f"```\n{text}\n```")
     else:
+        text = get_from_esv(query=query, strict=True)
         st.markdown(text, unsafe_allow_html=True)
     cols = st.columns([1, 6, 1])
     cols[0].button(
