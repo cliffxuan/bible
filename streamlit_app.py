@@ -1,9 +1,9 @@
 import streamlit as st
+from PIL import Image
 
 from bible import get_from_esv, parse_query
 
-
-st.set_page_config(page_title="ESV Bible")
+st.set_page_config(page_title="ESV Bible", page_icon=Image.open("favicon.png"))
 
 
 def get_prev_next_chapters(query: str) -> tuple[str, str]:
