@@ -5,6 +5,8 @@ from bible import get_from_esv, parse_query
 
 st.set_page_config(page_title="ESV Bible", page_icon=Image.open("favicon.png"))
 
+props = st.session_state.setdefault("props", {})
+
 
 def get_prev_next_chapters(query: str) -> tuple[str, str]:
     start_verse, end_verse = parse_query(query)
@@ -24,15 +26,12 @@ def get_prev_next_chapters(query: str) -> tuple[str, str]:
 
 
 def get_search_query() -> str:
-    return st.session_state.get("query") or "Psalm8"
+    return props.setdefault("query", "Psalm8")
 
 
 def set_search_query(query: str):
-    st.session_state.query = query
-
-
-def get_show_raw() -> bool:
-    return st.session_state.get("show_raw") or False
+    if query:
+        props["query"] = query
 
 
 def top_bar():
@@ -43,26 +42,23 @@ def top_bar():
         placeholder="search pattern: Psalm8 | Ps8 | Ps8:1-3 | Ps8v1-3",
         label_visibility="collapsed",
         key="query",
+        on_change=lambda: set_search_query(st.session_state.query),
     )
-    cols[1].toggle(":scroll:", value=get_show_raw(), key="show_raw")
+    cols[1].toggle(":scroll:", key="show_raw")
 
 
 def bottom_bar(query: str):
     prev_chapter, next_chapter = get_prev_next_chapters(query)
     cols = st.columns([1, 6, 1])
-    cols[0].button(
-        ":arrow_backward:", on_click=set_search_query, kwargs={"query": prev_chapter}
-    )
-    cols[-1].button(
-        ":arrow_forward:", on_click=set_search_query, kwargs={"query": next_chapter}
-    )
+    cols[0].button(":arrow_backward:", on_click=lambda: set_search_query(prev_chapter))
+    cols[-1].button(":arrow_forward:", on_click=lambda: set_search_query(next_chapter))
 
 
 def main():
     st.header("ESV Bible")
     top_bar()
     query = get_search_query()
-    if get_show_raw():
+    if st.session_state.show_raw:
         text = get_from_esv(query=query, strict=False)
         st.markdown(f"```\n{text}\n```")
     else:
