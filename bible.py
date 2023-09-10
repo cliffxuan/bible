@@ -325,11 +325,11 @@ def get_esv_passages(start_verse: Verse, end_verse: t.Optional[Verse]) -> str:
             qs = f"{qs}-{end_verse.chapter_number}"
             if end_verse.number > 0:
                 qs = f"{qs}:{end_verse.number}"
-    return call_esv_api(qs)
+    return fetch(qs)
 
 
 @cache
-def call_esv_api(query: str) -> str:
+def fetch(query: str) -> str:
     qs = urllib.parse.urlencode({"q": query})
     token = base64.b85decode(b"F<~)fGGa1gV_`WmF=I40Gc!0aGch(}F=8}gH92B8HaKN6G%;Z_")
     response = urllib.request.urlopen(

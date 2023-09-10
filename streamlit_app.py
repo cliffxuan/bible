@@ -23,32 +23,32 @@ def get_prev_next_chapters(query: str) -> tuple[str, str]:
     return prev_chapter, next_chapter
 
 
+def get_search_query() -> str:
+    return st.session_state.get("query") or "Psalm8"
+
+
 def set_search_query(query: str):
     st.session_state.query = query
 
 
-def get_search_query() -> str:
-    return st.session_state.setdefault("query", "Psalm8")
+def get_show_raw() -> bool:
+    return st.session_state.get("show_raw") or False
 
 
-def main():
-    st.header("ESV Bible")
+def top_bar():
     cols = st.columns([5, 1])
-    query = cols[0].text_input(
+    cols[0].text_input(
         "search",
         value=get_search_query(),
         placeholder="search pattern: Psalm8 | Ps8 | Ps8:1-3 | Ps8v1-3",
         label_visibility="collapsed",
+        key="query",
     )
-    if not query.strip():
-        return
+    cols[1].toggle(":scroll:", value=get_show_raw(), key="show_raw")
+
+
+def bottom_bar(query: str):
     prev_chapter, next_chapter = get_prev_next_chapters(query)
-    if cols[1].toggle(":scroll:"):
-        text = get_from_esv(query=query, strict=False)
-        st.markdown(f"```\n{text}\n```")
-    else:
-        text = get_from_esv(query=query, strict=True)
-        st.markdown(text, unsafe_allow_html=True)
     cols = st.columns([1, 6, 1])
     cols[0].button(
         ":arrow_backward:", on_click=set_search_query, kwargs={"query": prev_chapter}
@@ -56,6 +56,20 @@ def main():
     cols[-1].button(
         ":arrow_forward:", on_click=set_search_query, kwargs={"query": next_chapter}
     )
+
+
+def main():
+    st.header("ESV Bible")
+    top_bar()
+    query = get_search_query()
+    if get_show_raw():
+        text = get_from_esv(query=query, strict=False)
+        st.markdown(f"```\n{text}\n```")
+    else:
+        text = get_from_esv(query=query, strict=True)
+        st.markdown(text, unsafe_allow_html=True)
+
+    bottom_bar(query)
 
 
 if __name__ == "__main__":
