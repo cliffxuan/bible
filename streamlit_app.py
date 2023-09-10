@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import streamlit as st
 from PIL import Image
 
@@ -5,7 +7,17 @@ from bible import get_from_esv, parse_query
 
 st.set_page_config(page_title="ESV Bible", page_icon=Image.open("favicon.png"))
 
-props = st.session_state.setdefault("props", {})
+
+@dataclass(eq=True)
+class Props:
+    query: str = "Gen1"
+
+    def set_search_query(self, query: str):
+        if query:
+            self.query = query
+
+
+props = st.session_state.setdefault("props", Props())
 
 
 def get_prev_next_chapters(query: str) -> tuple[str, str]:
@@ -25,24 +37,15 @@ def get_prev_next_chapters(query: str) -> tuple[str, str]:
     return prev_chapter, next_chapter
 
 
-def get_search_query() -> str:
-    return props.setdefault("query", "Psalm8")
-
-
-def set_search_query(query: str):
-    if query:
-        props["query"] = query
-
-
 def top_bar():
     cols = st.columns([5, 1])
     cols[0].text_input(
         "search",
-        value=get_search_query(),
+        value=props.query,
         placeholder="search pattern: Psalm8 | Ps8 | Ps8:1-3 | Ps8v1-3",
         label_visibility="collapsed",
         key="query",
-        on_change=lambda: set_search_query(st.session_state.query),
+        on_change=lambda: props.set_search_query(st.session_state.query),
     )
     cols[1].toggle(":scroll:", key="show_raw")
 
@@ -50,22 +53,25 @@ def top_bar():
 def bottom_bar(query: str):
     prev_chapter, next_chapter = get_prev_next_chapters(query)
     cols = st.columns([1, 6, 1])
-    cols[0].button(":arrow_backward:", on_click=lambda: set_search_query(prev_chapter))
-    cols[-1].button(":arrow_forward:", on_click=lambda: set_search_query(next_chapter))
+    cols[0].button(
+        ":arrow_backward:", on_click=lambda: props.set_search_query(prev_chapter)
+    )
+    cols[-1].button(
+        ":arrow_forward:", on_click=lambda: props.set_search_query(next_chapter)
+    )
 
 
 def main():
     st.header("ESV Bible")
     top_bar()
-    query = get_search_query()
     if st.session_state.show_raw:
-        text = get_from_esv(query=query, strict=False)
+        text = get_from_esv(query=props.query, strict=False)
         st.markdown(f"```\n{text}\n```")
     else:
-        text = get_from_esv(query=query, strict=True)
+        text = get_from_esv(query=props.query, strict=True)
         st.markdown(text, unsafe_allow_html=True)
 
-    bottom_bar(query)
+    bottom_bar(props.query)
 
 
 if __name__ == "__main__":
