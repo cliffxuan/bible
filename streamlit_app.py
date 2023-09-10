@@ -3,6 +3,9 @@ import streamlit as st
 from bible import get_from_esv, parse_query
 
 
+st.set_page_config(page_title="ESV Bible")
+
+
 def get_prev_next_chapters(query: str) -> tuple[str, str]:
     start_verse, end_verse = parse_query(query)
     if start_verse.chapter_number == 1:
