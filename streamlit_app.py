@@ -13,6 +13,7 @@ class Props:
     query: str = "Gen1"
 
     def set_search_query(self, query: str):
+        query = query.strip()
         if query:
             self.query = query
 
