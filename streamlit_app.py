@@ -12,7 +12,7 @@ st.set_page_config(page_title="ESV Bible", page_icon=Image.open("favicon.png"))
 class Props:
     query: str = "Gen1"
 
-    def set_search_query(self, query: str):
+    def set_query(self, query: str):
         query = query.strip()
         if query:
             self.query = query
@@ -46,7 +46,7 @@ def top_bar():
         placeholder="search pattern: Psalm8 | Ps8 | Ps8:1-3 | Ps8v1-3",
         label_visibility="collapsed",
         key="query",
-        on_change=lambda: props.set_search_query(st.session_state.query),
+        on_change=lambda: props.set_query(st.session_state.query),
     )
     cols[1].toggle(":scroll:", key="show_raw")
 
@@ -55,10 +55,10 @@ def bottom_bar(query: str):
     prev_chapter, next_chapter = get_prev_next_chapters(query)
     cols = st.columns([1, 6, 1])
     cols[0].button(
-        ":arrow_backward:", on_click=lambda: props.set_search_query(prev_chapter)
+        ":arrow_backward:", on_click=lambda: props.set_query(prev_chapter)
     )
     cols[-1].button(
-        ":arrow_forward:", on_click=lambda: props.set_search_query(next_chapter)
+        ":arrow_forward:", on_click=lambda: props.set_query(next_chapter)
     )
 
 
